@@ -12,6 +12,9 @@
     "js": [
       "node_modules/webextension-polyfill/dist/browser-polyfill.js",
       "content.js"
+    ],
+    "css": [
+      "ui.css"
     ]
   }]
 }

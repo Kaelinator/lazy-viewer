@@ -1,0 +1,6 @@
+.lazy_video_ui {
+  background-color: red;
+  color: white;
+  position: absolute;
+  z-index: 1;
+}
