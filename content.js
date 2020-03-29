@@ -5,7 +5,9 @@ const addUI = (video, i) => {
   overlay.className = 'video-overlay'
   const controls = document.createElement('div')
   controls.className = 'video-controls'
+  controls.id = `video-controls-${i}`
   const header = document.createElement('h1')
+  header.id = `ui-${i}`
   header.innerText = 'content'
   controls.appendChild(header)
   overlay.appendChild(controls)
@@ -14,10 +16,6 @@ const addUI = (video, i) => {
 }
 
 const getAudio = (video, i) => {
-  // const context = new AudioContext()
-  // const gainNode = context.createGain()
-  // source = context.createMediaElementSource(video)
-  // source.connect(gainNode)
   const context = new AudioContext()
   const analyser = context.createAnalyser()
   analyser.fftSize = 256
@@ -25,14 +23,18 @@ const getAudio = (video, i) => {
   source = context.createMediaElementSource(video)
   source.connect(analyser)
   analyser.connect(context.destination)
+  const controls = document.getElementById(`video-controls-${i}`)
+  const header = document.getElementById(`ui-${i}`)
 
   setInterval(() => {
     analyser.getByteTimeDomainData(dataArray)
     const sum = dataArray.reduce((s, a) => s + a, 0)
+    const avg = (sum / dataArray.length - 128) * (1 / video.volume) + 128
 
-    console.log(sum / dataArray.length)
+    header.innerText = `${avg} / ${analyser.maxDecibels}`
+    controls.style.backgroundColor = (Math.abs(avg - 128) <= 3) ? 'red' : 'blue'
   }, 16)
 }
 
-// players.forEach(addUI)
+players.forEach(addUI)
 players.forEach(getAudio)
