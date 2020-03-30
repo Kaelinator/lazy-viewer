@@ -1,4 +1,7 @@
-const players = [...document.getElementsByTagName('video')]
+const FAST_RATE = 2
+const RATE = 1
+
+// const players = [...document.getElementsByTagName('video')]
 
 const addUI = (video, i) => {
   const overlay = document.createElement('div')
@@ -20,19 +23,28 @@ const getAudio = (video, i) => {
   const analyser = context.createAnalyser()
   analyser.fftSize = 256
   const dataArray = new Uint8Array(analyser.frequencyBinCount)
-  source = context.createMediaElementSource(video)
+  const source = context.createMediaElementSource(video)
+  console.log(source)
   source.connect(analyser)
   analyser.connect(context.destination)
   const controls = document.getElementById(`video-controls-${i}`)
   const header = document.getElementById(`ui-${i}`)
 
+  const polling = Array(10).fill(true)
+  console.log(video)
+
   setInterval(() => {
     analyser.getByteTimeDomainData(dataArray)
     const sum = dataArray.reduce((s, a) => s + a, 0)
-    const avg = (sum / dataArray.length - 128) * (1 / video.volume) + 128
+    const avg = (sum / dataArray.length - 128) * (1 / video.volume)
 
-    header.innerText = `${avg} / ${analyser.maxDecibels}`
-    controls.style.backgroundColor = (Math.abs(avg - 128) <= 3) ? 'red' : 'blue'
+    const isTalking = Math.abs(avg) > 3
+    polling.shift()
+    polling.push(isTalking)
+    const hasNotTalked = polling.every(x => !x)
+    video.playbackRate = hasNotTalked ? FAST_RATE : RATE
+    header.innerText = `${video.playbackRate}x`
+    controls.style.backgroundColor = hasNotTalked ? 'red' : 'blue'
   }, 16)
 }
 
